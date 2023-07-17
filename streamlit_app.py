@@ -57,7 +57,8 @@ def run_query(query):
     rows = [dict(row) for row in raw_rows]
     return rows
 rows = run_query("SELECT * FROM amazon_product_reviews.sentiment ORDER BY Product_Name")
-df = rows.to_dataframe()
-st.write(df)
+
+for row in rows:
+    st.write(row)
     
 
