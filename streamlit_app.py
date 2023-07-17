@@ -3,6 +3,19 @@ import altair as alt
 import math
 import pandas as pd
 import streamlit as st
+from google.oauth2 import service_account
+from google.cloud import bigquery
+
+# Constants
+project_id = 'appbuilder-388321'
+location = 'us-central1'
+
+# Create API client.
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"]
+)
+client = bigquery.Client(credentials=credentials)
+
 
 """
 # Welcome to Streamlit!
@@ -36,3 +49,15 @@ with st.echo(code_location='below'):
     st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
         .mark_circle(color='#0068c9', opacity=0.5)
         .encode(x='x:Q', y='y:Q'))
+
+@st.cache_data(ttl=600)
+def run_query():
+    client = bigquery.Client()
+    sql = """
+    SELECT *
+    FROM 'appbuilder-388321.amazon_product_reviews.sentiment'
+    ORDER BY Product_Name
+    """
+df = client.query(sql, project=project_id).to_dataframe()  
+st.write(df)
+
