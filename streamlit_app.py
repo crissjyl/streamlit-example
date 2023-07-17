@@ -52,12 +52,11 @@ with st.echo(code_location='below'):
 
 @st.cache_data(ttl=600)
 def run_query(query):
-    client = bigquery.Client(credentials=credentials)
-    QUERY = (
-        "SELECT * FROM 'appbuilder-388321.amazon_product_reviews.sentiment' ORDER BY Product_Name")
-    query_job = client.query(QUERY)
-    rows = query_job.result()
-
+    query_job = client.query(query)
+    raw_rows = query_job.result()
+    rows = [dict(row) for row in raw_rows]
+    return rows
+rows = run_query("SELECT * FROM 'appbuilder-388321.amazon_product_reviews.sentiment' ORDER BY Product_Name")
 df = rows.to_dataframe()
 st.write(df)
     
