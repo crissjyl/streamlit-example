@@ -51,13 +51,14 @@ with st.echo(code_location='below'):
         .encode(x='x:Q', y='y:Q'))
 
 @st.cache_data(ttl=600)
-def run_query():
-    client = bigquery.Client()
-    sql = """
-    SELECT *
-    FROM 'appbuilder-388321.amazon_product_reviews.sentiment'
-    ORDER BY Product_Name
-    """
-df = client.query(sql, project=project_id).to_dataframe()  
+def run_query(query):
+    client = bigquery.Client(credentials=credentials)
+    QUERY = (
+        "SELECT * FROM 'appbuilder-388321.amazon_product_reviews.sentiment' ORDER BY Product_Name")
+    query_job = client.query(QUERY)
+    rows = query_job.result()
+
+df = rows.to_dataframe()
 st.write(df)
+    
 
