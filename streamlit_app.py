@@ -12,6 +12,7 @@ from langchain.prompts import PromptTemplate
 
 # Vertex AI
 from google.cloud import aiplatform
+import vertexai
 from langchain.chat_models import ChatVertexAI
 from langchain.embeddings import VertexAIEmbeddings
 from langchain.llms import VertexAI
