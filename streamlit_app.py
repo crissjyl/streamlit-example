@@ -80,8 +80,7 @@ with st.form('promptForm'):
     if submitted:
         aste(review)
 
-expander = st.expander("Prompt Template")
-expander.write(\"\"\"
+'''
     template = """
     Perform Aspect Sentiment Triplet Extract task. Given {review}, tag all (aspect, opinion, sentiment) triplets. Aspect and opinion should be substring of the sentence. Sentiment should be selected from ['negative', 'neutral', 'positive'].
     Return a list containing three strings. Return the list only, without any other comments or texts.\n
@@ -100,5 +99,5 @@ expander.write(\"\"\"
         template = template,)
     final_prompt = prompt.format(review=review)
     return llm(final_prompt)
-    \"\"\")
+'''
 
