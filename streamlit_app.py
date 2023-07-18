@@ -33,7 +33,7 @@ vertexai.init(project=project_id, location=location, credentials=credentials)
 
 st.set_page_config(layout="wide")
 st.title("Sentiment Analysis of Amazon Product Reviews")    
-
+st.subheader("Prompt Templates: Ask LLM to perform Aspect Sentiment Triplet Extract task")
 
 @st.cache_data(ttl=600)
 def run_query(query):
@@ -76,7 +76,7 @@ def aste(review):
     st.info(llm(final_prompt))
 
 with st.form('promptForm'):
-    review = st.text_input('Prompt:','')
+    review = st.text_input('Review:','')
     submitted = st.form_submit_button('Submit')
     if submitted:
         aste(review)
@@ -109,6 +109,50 @@ code = '''
     return llm(final_prompt)'''
 st.code(code, language='python')
 
+st.divider()
+st.subheader("Q&A: Provide Context in the Prompt")
 
+def ask_question(question):
+    template = """
+    Use {df} table to answer question about sentiment about products. 
+    Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
+    If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
 
+    Question: What are the top two negative aspects of "Adjustable Adult And Kids Bicycle Bike Training Wheels Fits 24" to 28" reviews?
+    Answer: The U shaped parts are too tight and the price is too high.
 
+    Question: {question}
+    Answer:
+    """
+    prompt = PromptTemplate(
+        input_variables = ['question'],
+        template = template,)
+    final_prompt = prompt.format(question=question)
+    st.info(llm(final_prompt))
+
+with st.form('qaForm'):
+    question = st.text_input('Question:','')
+    submitted = st.form_submit_button('Submit')
+    if submitted:
+        ask_question(question)
+
+code2 = '''
+def ask_question(question):
+    template = """
+    Use {df} table to answer question about sentiment about products. 
+    Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
+    If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
+
+    Question: What are the top two negative aspects of "Adjustable Adult And Kids Bicycle Bike Training Wheels Fits 24" to 28" reviews?
+    Answer: The U shaped parts are too tight and the price is too high.
+
+    Question: {question}
+    Answer:
+    """
+    prompt = PromptTemplate(
+        input_variables = ['question'],
+        template = template,)
+    final_prompt = prompt.format(question=question)
+    st.info(llm(final_prompt))
+'''
+st.code(code2, language='python')
