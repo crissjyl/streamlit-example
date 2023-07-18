@@ -80,11 +80,11 @@ with st.form('promptForm'):
     if submitted:
         aste(review)
 
-st.markdown('model_name: red[text-bison@001]')
-st.markdown('max_output_tokens: red[400]')
-st.markdown('temperature: red[0.2]')
-st.markdown('top_p: red[0.8]')
-st.markdown('top_k: red[40]')
+st.markdown("model_name: red[text-bison@001]")
+st.markdown("max_output_tokens: red[400]")
+st.markdown("temperature: red[0.2]")
+st.markdown("top_p: red[0.8]")
+st.markdown("top_k: red[40]")
 
 code = '''
     template = """
