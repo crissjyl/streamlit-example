@@ -124,7 +124,7 @@ def ask_question(question):
     Question: {question}
     Answer:
     """
-    st.info(llm(prompt))
+    st.info(llm.predict(prompt))
 
 with st.form('qaForm'):
     question = st.text_input('Question:','')
