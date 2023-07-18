@@ -31,6 +31,7 @@ credentials = service_account.Credentials.from_service_account_info(
 client = bigquery.Client(credentials=credentials)
 vertexai.init(project=project_id, location=location, credentials=credentials)
 
+st.set_page_config(layout="wide")
 st.title("Sentiment Analysis of Amazon Product Reviews")    
 
 
@@ -80,13 +81,14 @@ with st.form('promptForm'):
     if submitted:
         aste(review)
 
-st.markdown("model_name: red[text-bison@001]")
-st.markdown("max_output_tokens: red[400]")
-st.markdown("temperature: red[0.2]")
-st.markdown("top_p: red[0.8]")
-st.markdown("top_k: red[40]")
-
 code = '''
+    model_name="text-bison@001",
+    max_output_tokens = 400,
+    temperature = 0.2,
+    top_p = 0.8,
+    top_k = 40,
+    verbose = True
+
     template = """
     Perform Aspect Sentiment Triplet Extract task. Given {review}, tag all (aspect, opinion, sentiment) triplets. Aspect and opinion should be substring of the sentence. Sentiment should be selected from ['negative', 'neutral', 'positive'].
     Return a list containing three strings. Return the list only, without any other comments or texts.\n
