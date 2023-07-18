@@ -45,4 +45,60 @@ rows = run_query("SELECT * FROM amazon_product_reviews.sentiment ORDER BY Produc
 df = pd.DataFrame(rows)
 st.dataframe(df)
     
+llm = VertexAI(
+    model_name="text-bison@001",
+    max_output_tokens = st.slider("Max Output Tokens", 1, 1024),
+    temperature = st.slider("Temperature", 0.0, 1.0),
+    top_p = st.slider("Top P", 0.0, 1.0),
+    top_k = st.slider("Top K", 1, 40),
+    verbose = True,
+)
 
+def aste(review):
+    template = """
+    Perform Aspect Sentiment Triplet Extract task. Given {review}, tag all (aspect, opinion, sentiment) triplets. Aspect and opinion should be substring of the sentence. Sentiment should be selected from ['negative', 'neutral', 'positive'].
+    Return a list containing three strings. Return the list only, without any other comments or texts.\n
+
+    review: Material is flimsy and cheap.
+    label:('material', 'filmsy and cheap', 'negative')
+        
+    review: I'm afraid to ride it. The seat remains wobbly after many attempts of tightening it.
+    label: ('seat', 'wobbly', 'negative')
+
+    review: {review}
+    label:
+    """
+    prompt = PromptTemplate(
+        input_variables = ["review"],
+        template = template,)
+    final_prompt = prompt.format(review=review)
+    return llm(final_prompt)
+
+with st.form('promptForm'):
+    review = st.text_input('Prompt:','')
+    submitted = st.form_submit_button('Submit')
+    if submitted:
+        aste(review)
+
+with st.expander("Prompt Template"):
+    st.write(\"\"\"
+        template = """
+        Perform Aspect Sentiment Triplet Extract task. Given {review}, tag all (aspect, opinion, sentiment) triplets. Aspect and opinion should be substring of the sentence. Sentiment should be selected from ['negative', 'neutral', 'positive'].
+        Return a list containing three strings. Return the list only, without any other comments or texts.\n
+
+        review: Material is flimsy and cheap.
+        label:('material', 'filmsy and cheap', 'negative')
+            
+        review: I'm afraid to ride it. The seat remains wobbly after many attempts of tightening it.
+        label: ('seat', 'wobbly', 'negative')
+
+        review: {review}
+        label:
+        """
+        prompt = PromptTemplate(
+            input_variables = ["review"],
+            template = template,)
+        final_prompt = prompt.format(review=review)
+        return llm(final_prompt)
+             \"\"\")
+             
