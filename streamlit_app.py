@@ -30,7 +30,6 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials=credentials)
 vertexai.init(project=project_id, location=location)
-st_callback = StreamlitCallbackHandler(st.container())
 
 st.title("Sentiment Analysis of Amazon Product Reviews")    
 
