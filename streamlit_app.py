@@ -29,7 +29,7 @@ credentials = service_account.Credentials.from_service_account_info(
     st.secrets["gcp_service_account"]
 )
 client = bigquery.Client(credentials=credentials)
-vertexai.init(project=project_id, location=location)
+vertexai.init(project=project_id, location=location, crendentials=credentials)
 
 st.title("Sentiment Analysis of Amazon Product Reviews")    
 
