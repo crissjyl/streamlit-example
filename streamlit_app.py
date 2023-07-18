@@ -113,7 +113,7 @@ st.divider()
 st.subheader("Q&A: Provide Context in the Prompt")
 
 def ask_question(question):
-    template = """
+    prompt = """
     Use {df} table to answer question about sentiment about products. 
     Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
     If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
@@ -124,11 +124,7 @@ def ask_question(question):
     Question: {question}
     Answer:
     """
-    prompt = PromptTemplate(
-        input_variables = ['question'],
-        template = template,)
-    final_prompt = prompt.format(question=question)
-    st.info(llm(final_prompt))
+    st.info(llm(prompt))
 
 with st.form('qaForm'):
     question = st.text_input('Question:','')
@@ -138,7 +134,7 @@ with st.form('qaForm'):
 
 code2 = '''
 def ask_question(question):
-    template = """
+    prompt = """
     Use {df} table to answer question about sentiment about products. 
     Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
     If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
