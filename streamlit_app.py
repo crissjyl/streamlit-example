@@ -47,10 +47,10 @@ st.dataframe(df)
     
 llm = VertexAI(
     model_name="text-bison@001",
-    max_output_tokens = st.slider("Max Output Tokens", 1, 1024),
-    temperature = st.slider("Temperature", 0.0, 1.0),
-    top_p = st.slider("Top P", 0.0, 1.0),
-    top_k = st.slider("Top K", 1, 40),
+    max_output_tokens = 400,
+    temperature = 0.2,
+    top_p = 0.8,
+    top_k = 40,
     verbose = True,
 )
 
@@ -80,7 +80,13 @@ with st.form('promptForm'):
     if submitted:
         aste(review)
 
-'''
+st.markdown('model_name: red[text-bison@001]')
+st.markdown('max_output_tokens: red[400]')
+st.markdown('temperature: red[0.2]')
+st.markdown('top_p: red[0.8]')
+st.markdown('top_k: red[40]')
+
+code = '''
     template = """
     Perform Aspect Sentiment Triplet Extract task. Given {review}, tag all (aspect, opinion, sentiment) triplets. Aspect and opinion should be substring of the sentence. Sentiment should be selected from ['negative', 'neutral', 'positive'].
     Return a list containing three strings. Return the list only, without any other comments or texts.\n
@@ -98,6 +104,9 @@ with st.form('promptForm'):
         input_variables = ["review"],
         template = template,)
     final_prompt = prompt.format(review=review)
-    return llm(final_prompt)
-'''
+    return llm(final_prompt)'''
+st.code(code, language='python')
+
+
+
 
