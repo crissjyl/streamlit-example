@@ -4,6 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+google-cloud-aiplatform = "*"
+langchain = "*"
+pydantic = "*"
+typing = "*"
+protobuf = "*"
 altair = "*"
 pandas = "*"
 streamlit = "*"
@@ -14,3 +19,6 @@ pandas-gbq = "*"
 
 [requires]
 python_version = "3.11"
+
+
+
