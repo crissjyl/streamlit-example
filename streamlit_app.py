@@ -6,12 +6,8 @@ import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
 # Langchain
-import langchain
-from pydantic import BaseModel
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import LLMChain, SimpleSequentialChain
-from langchain.prompts import PromptTemplate, FewShotPromptTemplate
+from langchain.callbacks import StreamlitCallbackHandler
+
 
 # Vertex AI
 from google.cloud import aiplatform
@@ -32,7 +28,7 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials=credentials)
 vertexai.init(project=project_id, location=location)
-
+st_callback = StreamlitCallbackHandler(st.container())
 
 st.title("Sentiment Analysis of Amazon Product Reviews")    
 
