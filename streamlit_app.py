@@ -6,6 +6,7 @@ import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
 # Langchain
+import langchain
 from langchain.prompts import PromptTemplate
 
 # Vertex AI
