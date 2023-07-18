@@ -17,6 +17,7 @@ from langchain.chat_models import ChatVertexAI
 from langchain.embeddings import VertexAIEmbeddings
 from langchain.llms import VertexAI
 from langchain.schema import HumanMessage, SystemMessage
+from langchain.chains import RetrievalQA
 
 
 
@@ -112,9 +113,11 @@ st.code(code, language='python')
 st.divider()
 st.subheader("Q&A: Provide Context in the Prompt")
 
+
 def ask_question(question):
-    prompt = """
-    Use {df} table to answer question about sentiment about products. 
+    prompt= f"""
+    Consider your input context the following context that is delimited by triple backticks with: 
+
     Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
     If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
 
