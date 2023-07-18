@@ -69,10 +69,10 @@ def aste(review):
     label:
     """
     prompt = PromptTemplate(
-        input_variables = ["review"],
+        input_variables = ['review'],
         template = template,)
     final_prompt = prompt.format(review=review)
-    return llm(final_prompt)
+    st.info(llm(final_prompt))
 
 with st.form('promptForm'):
     review = st.text_input('Prompt:','')
