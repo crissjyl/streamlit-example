@@ -40,6 +40,6 @@ def run_query(query):
 rows = run_query("SELECT * FROM amazon_product_reviews.sentiment ORDER BY Product_Name")
 
 df = pd.DataFrame(rows)
-st.table(df)
+st.dataframe(df)
     
 
