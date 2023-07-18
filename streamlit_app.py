@@ -7,7 +7,7 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 # Langchain
 from langchain.callbacks import StreamlitCallbackHandler
-
+from langchain.agents import AgentType, initialize_agent, load_tools
 
 # Vertex AI
 from google.cloud import aiplatform

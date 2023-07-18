@@ -5,6 +5,7 @@ google-cloud-bigquery
 pandas-gbq
 google-cloud-aiplatform
 langchain streamlit
+langchain
 pydantic
 typing
 
