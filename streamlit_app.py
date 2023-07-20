@@ -6,6 +6,8 @@ import pandas as pd
 import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
+from typing import List
+
 # Langchain
 import langchain
 from langchain.prompts import PromptTemplate
@@ -18,8 +20,9 @@ from langchain.embeddings import VertexAIEmbeddings
 from langchain.llms import VertexAI
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.chains import RetrievalQA
-
-
+from langchain.document_loaders import DataFrameLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import FAISS
 
 # Constants
 project_id = 'appbuilder-388321'
@@ -31,6 +34,60 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials=credentials)
 vertexai.init(project=project_id, location=location, credentials=credentials)
+
+# Vertex Utility Functions
+def rate_limit(max_per_minute):
+    period = 60 / max_per_minute
+    print("Waiting")
+    while True:
+        before = time.time()
+        yield
+        after = time.time()
+        elapsed = after - before
+        sleep_time = max(0, period - elapsed)
+        if sleep_time > 0:
+            print(".", end="")
+            time.sleep(sleep_time)
+
+
+class CustomVertexAIEmbeddings(VertexAIEmbeddings, BaseModel):
+    requests_per_minute: int
+    num_instances_per_batch: int
+
+    # Overriding embed_documents method
+    def embed_documents(self, texts: List[str]):
+        limiter = rate_limit(self.requests_per_minute)
+        results = []
+        docs = list(texts)
+
+        while docs:
+            # Working in batches because the API accepts maximum 5
+            # documents per request to get embeddings
+            head, docs = (
+                docs[: self.num_instances_per_batch],
+                docs[self.num_instances_per_batch :],
+            )
+            chunk = self.client.get_embeddings(head)
+            results.extend(chunk)
+            next(limiter)
+
+        return [r.values for r in results]
+
+# Embedding
+EMBEDDING_QPM = 100
+EMBEDDING_NUM_BATCH = 5
+embeddings = CustomVertexAIEmbeddings(
+    requests_per_minute=EMBEDDING_QPM,
+    num_instances_per_batch=EMBEDDING_NUM_BATCH,
+)
+
+llm = VertexAI(
+    model_name="text-bison@001",
+    max_output_tokens = 400,
+    temperature = 0.2,
+    top_p = 0.8,
+    top_k = 40,
+    verbose = True,
 
 st.set_page_config(layout="wide")
 st.title("Sentiment Analysis of Amazon Product Reviews")    
@@ -47,13 +104,7 @@ rows = run_query("SELECT * FROM amazon_product_reviews.sentiment ORDER BY Produc
 df = pd.DataFrame(rows)
 st.dataframe(df)
     
-llm = VertexAI(
-    model_name="text-bison@001",
-    max_output_tokens = 400,
-    temperature = 0.2,
-    top_p = 0.8,
-    top_k = 40,
-    verbose = True,
+
 )
 
 def aste(review):
@@ -111,23 +162,40 @@ code = '''
 st.code(code, language='python')
 
 st.divider()
-st.subheader("Q&A: Provide Context in the Prompt")
+st.subheader("Q&A Chain")
+
+@st.cache_data(ttl=600)
+def run_query2(query):
+    query_job = client.query(query)
+    raw_rows = query_job.result()
+    rows2 = [dict(row) for row in raw_rows]
+    return rows2
+rows2 = run_query2("SELECT * FROM amazon_product_reviews.reviews")
+
+df2 = pd.DataFrame(rows2)
+st.dataframe(df2)
+    
+# QA setup
+loader = DataFrameLoader(df2, page_content_column="text")
+documents = loader.load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+texts = text_splitter.split_documents(documents)
+db = FAISS.from_documents(texts, embeddings)
+retriever = db.as_retriever()
 
 
 def ask_question(question):
-    prompt= f"""
-    Consider your input context the following context that is delimited by triple backticks with: 
-
-    Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
-    If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
-
-    Question: What are the top two negative aspects of "Adjustable Adult And Kids Bicycle Bike Training Wheels Fits 24" to 28" reviews?
-    Answer: The U shaped parts are too tight and the price is too high.
+    template = """Use the provided context to answer the input question.
+    {context}
 
     Question: {question}
-    Answer:
-    """
-    st.info(llm.predict(prompt))
+    Answer: """
+    prompt = PromptTemplate(
+        template=template, input_variables=["context", "question"])
+    chain_type_kwargs = {"prompt": prompt}
+    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, chain_type_kwargs=chain_type_kwargs)
+    question = question
+    st.info(qa.run(question))
 
 with st.form('qaForm'):
     question = st.text_input('Question:','')
@@ -135,23 +203,3 @@ with st.form('qaForm'):
     if submitted:
         ask_question(question)
 
-code2 = '''
-def ask_question(question):
-    prompt = """
-    Use {df} table to answer question about sentiment about products. 
-    Sentiment should be based on the results_text column and your response should be selected from ['negative', 'neutral', 'positive'].
-    If asked about aspects, analyze the results_text column values, perform an Aspect Sentiment Triplet Extract task and return aspects and opinions.
-
-    Question: What are the top two negative aspects of "Adjustable Adult And Kids Bicycle Bike Training Wheels Fits 24" to 28" reviews?
-    Answer: The U shaped parts are too tight and the price is too high.
-
-    Question: {question}
-    Answer:
-    """
-    prompt = PromptTemplate(
-        input_variables = ['question'],
-        template = template,)
-    final_prompt = prompt.format(question=question)
-    st.info(llm(final_prompt))
-'''
-st.code(code2, language='python')

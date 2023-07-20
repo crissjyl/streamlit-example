@@ -1,0 +1,3 @@
+chromadb
+SQLAlchemy
+sqlalchemy-bigquery

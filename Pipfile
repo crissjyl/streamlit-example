@@ -14,11 +14,11 @@ pandas = "*"
 streamlit = "*"
 google-cloud-bigquery = "*"
 pandas-gbq = "*"
+faiss-cpu = "
+typing = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.11"
-
-
 
