@@ -169,7 +169,7 @@ def load_data(file):
     return df_qa
 df_qa = load_data("./data/output2.csv")
 st.dataframe(df_qa, use_container_width=True)
-loader = DataFrameLoader(df_qa, page_content_column="text")
+loader = DataFrameLoader(df_qa, page_content_column="text", hide_index=True)
 documents = loader.load()
 
 def splitText(documents):
