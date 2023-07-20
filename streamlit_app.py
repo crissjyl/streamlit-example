@@ -87,7 +87,7 @@ llm = VertexAI(
     temperature = 0.2,
     top_p = 0.8,
     top_k = 40,
-    verbose = True,
+    verbose = True,)
 
 st.set_page_config(layout="wide")
 st.title("Sentiment Analysis of Amazon Product Reviews")    
@@ -174,15 +174,25 @@ rows2 = run_query2("SELECT * FROM amazon_product_reviews.reviews")
 
 df2 = pd.DataFrame(rows2)
 st.dataframe(df2)
-    
-# QA setup
-loader = DataFrameLoader(df2, page_content_column="text")
-documents = loader.load()
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
-texts = text_splitter.split_documents(documents)
-db = FAISS.from_documents(texts, embeddings)
-retriever = db.as_retriever()
 
+@st.cache(allow_output_mutation=True)
+def DataFrameLoader(df2, page_content_column):
+    loader = DataFrameLoader(df2, page_content_column="text")
+    documents = loader.load()
+    return documents
+
+@st.cache(allow_output_mutation=True)
+def RecursiveCharacterTextSplitter(chunk_size, chunk_overlap):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+    texts = text_splitter.split_documents(documents)
+    return texts
+
+@st.cache(allow_output_mutation=True)
+def FAISS(texts, embeddings):
+    db = FAISS.from_documents(texts, embeddings)
+    return db
+
+retriever = db.as_retriever()
 
 def ask_question(question):
     template = """Use the provided context to answer the input question.
