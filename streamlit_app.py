@@ -127,7 +127,7 @@ def aste(review):
     st.info(llm(final_prompt))
 
 with st.form('promptForm'):
-    review = st.text_input('Review:','')
+    review = st.text_input('Review (copy and paste a review to get a label):','')
     submitted = st.form_submit_button('Submit')
     if submitted:
         aste(review)
@@ -197,7 +197,7 @@ def ask_question(question):
     st.info(qa.run(question))
 
 with st.form('qaForm'):
-    question = st.text_input('Question:','')
+    question = st.text_input('Question (e.g. What are the top negative aspects of Adventure Fund Bank):','')
     submitted = st.form_submit_button('Submit')
     if submitted:
         ask_question(question)
