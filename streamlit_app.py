@@ -203,3 +203,19 @@ with st.form('qaForm'):
     if submitted:
         ask_question(question)
 
+code2 = '''
+def ask_question(question):
+  template = """Use the provided context to answer the input question. 
+  {context}
+
+  Question: {question}
+  Answer: """
+  prompt = PromptTemplate(
+      template=template, input_variables=["context", "question"]
+  )
+  chain_type_kwargs = {"prompt": prompt}
+  qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, chain_type_kwargs=chain_type_kwargs)
+  qa.run(question)
+  '''
+st.code(code2, language='python')
+
