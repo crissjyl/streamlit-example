@@ -171,7 +171,6 @@ st.dataframe(df_qa)
 loader = DataFrameLoader(df_qa, page_content_column="text")
 documents = loader.load()
 
-@st.cache_data(ttl=600)
 def splitText(documents):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=500, 
