@@ -171,11 +171,14 @@ loader = DataFrameLoader(df_qa, page_content_column="text")
 documents = loader.load()
 
 @st.cache_data(ttl=600)
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500, 
-    chunk_overlap=0)
+def splitText(documents):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500, 
+        chunk_overlap=0)
+    texts = text_splitter.split_documents(documents)
+    return texts
 
-texts = text_splitter.split_documents(documents)
+texts= splitText(documents)
 
 db = FAISS.from_documents(texts, embeddings)
 retriever = db.as_retriever()
