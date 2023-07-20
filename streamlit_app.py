@@ -88,7 +88,7 @@ llm = VertexAI(
     top_p = 0.8,
     top_k = 40,
     verbose = True,)
-#########################################################################################
+####################################### PART 1 ########################################
 st.set_page_config(layout="wide")
 st.title("Sentiment Analysis of Amazon Product Reviews")    
 st.subheader("Prompt Templates: Ask LLM to perform Aspect Sentiment Triplet Extract task")
@@ -157,22 +157,24 @@ code = '''
     final_prompt = prompt.format(review=review)
     return llm(final_prompt)'''
 st.code(code, language='python')
-#########################################################################################
+########################################## PART 2 ######################################
 st.divider()
 st.subheader("Q&A with RetrievalQA Chain")
 
-df_qa = pd.read_csv('/Users/liuchristie/Projects/streamlit/streamlit-example/output2.csv') 
+@st.cache_data(ttl=600)
+df_qa = pd.read_csv('/Users/liuchristie/Projects/streamlit/streamlit-example/output2.csv')
 st.dataframe(df_qa)
+loader = DataFrameLoader(df_qa, page_content_column="text")
 
-@st.cache(allow_output_mutation=True)
-loader = DataFrameLoader(df2, page_content_column="text")
 documents = loader.load()
 
-def RecursiveCharacterTextSplitter(chunk_size, chunk_overlap):
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+@st.cache_data(ttl=600)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500, 
+    chunk_overlap=0)
+
 texts = text_splitter.split_documents(documents)
 
-@st.cache(allow_output_mutation=True)
 db = FAISS.from_documents(texts, embeddings)
 retriever = db.as_retriever()
 
