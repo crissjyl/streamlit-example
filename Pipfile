@@ -14,7 +14,7 @@ pandas = "*"
 streamlit = "*"
 google-cloud-bigquery = "*"
 pandas-gbq = "*"
-faiss-cpu = "
+faiss-cpu = "*"
 typing = "*"
 
 [dev-packages]
