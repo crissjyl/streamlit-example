@@ -162,7 +162,7 @@ st.divider()
 st.subheader("Q&A with RetrievalQA Chain")
 
 @st.cache_data(ttl=600)
-df_qa = pd.read_csv('./output2.csv')
+df_qa = pd.read_csv('output2.csv')
 st.dataframe(df_qa)
 loader = DataFrameLoader(df_qa, page_content_column="text")
 documents = loader.load()
