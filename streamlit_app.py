@@ -160,7 +160,7 @@ st.code(code, language='python')
 ########################################## PART 2 ######################################
 st.divider()
 st.subheader("Q&A with RetrievalQA Chain")
-
+ 
 @st.cache_data(ttl=600)
 df_qa = pd.read_csv('output2.csv')
 st.dataframe(df_qa)
