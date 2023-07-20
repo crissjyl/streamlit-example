@@ -88,7 +88,7 @@ llm = VertexAI(
     top_p = 0.8,
     top_k = 40,
     verbose = True,)
-
+#########################################################################################
 st.set_page_config(layout="wide")
 st.title("Sentiment Analysis of Amazon Product Reviews")    
 st.subheader("Prompt Templates: Ask LLM to perform Aspect Sentiment Triplet Extract task")
@@ -103,9 +103,6 @@ rows = run_query("SELECT * FROM amazon_product_reviews.sentiment ORDER BY Produc
 
 df = pd.DataFrame(rows)
 st.dataframe(df)
-    
-
-)
 
 def aste(review):
     template = """
@@ -160,38 +157,23 @@ code = '''
     final_prompt = prompt.format(review=review)
     return llm(final_prompt)'''
 st.code(code, language='python')
-
+#########################################################################################
 st.divider()
-st.subheader("Q&A Chain")
+st.subheader("Q&A with RetrievalQA Chain")
 
-@st.cache_data(ttl=600)
-def run_query2(query):
-    query_job = client.query(query)
-    raw_rows = query_job.result()
-    rows2 = [dict(row) for row in raw_rows]
-    return rows2
-rows2 = run_query2("SELECT * FROM amazon_product_reviews.reviews")
-
-df2 = pd.DataFrame(rows2)
-st.dataframe(df2)
+df_qa = pd.read_csv('/Users/liuchristie/Projects/streamlit/streamlit-example/output2.csv') 
+st.dataframe(df_qa)
 
 @st.cache(allow_output_mutation=True)
-def DataFrameLoader(df2, page_content_column):
-    loader = DataFrameLoader(df2, page_content_column="text")
-    documents = loader.load()
-    return documents
+loader = DataFrameLoader(df2, page_content_column="text")
+documents = loader.load()
 
-@st.cache(allow_output_mutation=True)
 def RecursiveCharacterTextSplitter(chunk_size, chunk_overlap):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
-    texts = text_splitter.split_documents(documents)
-    return texts
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+texts = text_splitter.split_documents(documents)
 
 @st.cache(allow_output_mutation=True)
-def FAISS(texts, embeddings):
-    db = FAISS.from_documents(texts, embeddings)
-    return db
-
+db = FAISS.from_documents(texts, embeddings)
 retriever = db.as_retriever()
 
 def ask_question(question):
@@ -204,7 +186,6 @@ def ask_question(question):
         template=template, input_variables=["context", "question"])
     chain_type_kwargs = {"prompt": prompt}
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, chain_type_kwargs=chain_type_kwargs)
-    question = question
     st.info(qa.run(question))
 
 with st.form('qaForm'):
@@ -224,7 +205,7 @@ def ask_question(question):
       template=template, input_variables=["context", "question"]
   )
   chain_type_kwargs = {"prompt": prompt}
-  qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, chain_type_kwargs=chain_type_kwargs)
+  qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=db.as_retriever(), chain_type_kwargs=chain_type_kwargs)
   qa.run(question)
   '''
 st.code(code2, language='python')
